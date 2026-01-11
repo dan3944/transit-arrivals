@@ -1,0 +1,4 @@
+aiohttp
+font-source-sans-pro
+gtfs-realtime-bindings
+pillow>=8.0.0
