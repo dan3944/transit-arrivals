@@ -1,10 +1,9 @@
 import datetime as dt
 from PIL import Image, ImageDraw, ImageColor, ImageFont
-from font_source_sans_pro import SourceSansPro ##
+from font_source_sans_pro import SourceSansPro
 from typing import List
 
 from data import Arrival
-
 
 
 def draw(stop_name: str, now: dt.datetime, arrivals: List[Arrival]) -> Image:

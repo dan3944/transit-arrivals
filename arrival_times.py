@@ -1,18 +1,10 @@
-'''
-pip3 install gtfs-realtime-bindings requests
-pip3 install fonts # TODO: necessary?
-font-source-sans-pro
-pillow >= 8.0.0
-sudo apt-get install python3-tk
-'''
-import aiohttp ##
+import aiohttp
 import asyncio
 import csv
 import datetime as dt
 import tkinter as tk
-from collections import defaultdict
-from google.transit import gtfs_realtime_pb2 ##
-from PIL import ImageTk ##
+from google.transit import gtfs_realtime_pb2
+from PIL import ImageTk
 
 from data import Arrival, Route
 from draw import draw
@@ -62,17 +54,6 @@ def main(stop_id: str):
         print('fetching data')
         async with aiohttp.ClientSession() as session:
             feeds = await asyncio.gather(*(fetch_feed(url, session) for url in urls))
-
-        # alerts_by_trip_id = defaultdict(list)
-        # for feed in feeds:
-        #     for entity in feed.entity:
-        #         if not entity.HasField('alert'):
-        #             continue
-        #         message = entity.alert.header_text.translation[0].text
-        #         for entity in entity.alert.informed_entity:
-        #             alerts_by_trip_id[entity.trip.trip_id].append(message)
-        # if alerts_by_trip_id:
-        #     print('alerts:', alerts_by_trip_id)
 
         arrivals = [
             Arrival(stop, route=routes[entity.trip_update.trip.route_id])
