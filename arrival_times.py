@@ -1,7 +1,9 @@
 import aiohttp
+import argparse
 import asyncio
 import csv
 import datetime as dt
+import logging
 import tkinter as tk
 from google.transit import gtfs_realtime_pb2
 from PIL import ImageTk
@@ -17,7 +19,7 @@ async def fetch_feed(url: str, session) -> gtfs_realtime_pb2.FeedMessage:
         return feed
 
 
-def main(stop_id: str):
+def main(stop_id: str, refresh_rate: int):
     with open('gtfs_subway/routes.txt') as f:
         routes = {
             line['route_id']: Route(
@@ -51,7 +53,7 @@ def main(stop_id: str):
             # Staten Island Railroad:
             # 'https://api-endpoint.mta.info/Dataservice/mtagtfsfeeds/nyct%2Fgtfs-si'
         ]
-        print('fetching data')
+        logging.info('Fetching data...')
         async with aiohttp.ClientSession() as session:
             feeds = await asyncio.gather(*(fetch_feed(url, session) for url in urls))
 
@@ -67,19 +69,29 @@ def main(stop_id: str):
             dt.datetime.now(),
             [a for a in arrivals if a.stop_id == stop_id]))
         label.config(image=photo)
-        label.image = photo
-        print('updated image')
-        label.after(10_000, lambda: loop.run_until_complete(refresh_image()))
+        label.image = photo  # prevent `photo` from getting garbage-collected
+        logging.info('Updated image')
+        label.after(refresh_rate * 1000, lambda: loop.run_until_complete(refresh_image()))
 
     loop = asyncio.get_event_loop()
     root.after(1, lambda: loop.run_until_complete(refresh_image()))
     root.mainloop()
 
 
+'''
+Example stop IDs:
+    86th/Broadway: 121
+    96th/Broadway: 120
+    86th/Central Park West: A20
+    Columbus Circle: A24
+    Pelham Parkway: 504
+    E 180th St: 213
+'''
+
 if __name__ == '__main__':
-    stop_id_86_bway = '121'
-    stop_id_96_bway = '120'
-    stop_id_86_cpw = 'A20'
-    stop_id_columbus_circle = 'A24'
-    stop_id_pelham_pkwy = '504'
-    main('213')
+    logging.basicConfig(format='%(asctime)s %(levelname)s %(message)s', level=logging.INFO)
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-s', '--stop_id', required=True, help='The stop ID to display (from stops.txt)')
+    parser.add_argument('-r', '--refresh_rate', type=int, default=10, help='The refresh rate in seconds')
+    args = parser.parse_args()
+    main(args.stop_id, args.refresh_rate)

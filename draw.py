@@ -21,13 +21,13 @@ def draw(stop_name: str, now: dt.datetime, arrivals: List[Arrival]) -> Image:
     img = Image.new("P", (IMG_WIDTH, IMG_HEIGHT), ImageColor.colormap['black'])
     draw = ImageDraw.Draw(img)
 
-    def write(text: str, *, x: float, y: float, anchor=None, color=ImageColor.colormap['white'], size=CELL_HEIGHT * 0.6):
+    def write(text: str, *, x: float, y: float, color=ImageColor.colormap['white'], size=CELL_HEIGHT * 0.6, **kwargs):
         # _, _, w, h = FONT.getbbox(text)
-        # # if center_x:
-        # #     x -= w / 2
-        # # if center_y:
-        # #     y -= h / 2
-        draw.text((x, y), text, color, ImageFont.truetype(SourceSansPro, size=size), anchor=anchor)
+        # if center_x:
+        #     x -= w / 2
+        # if center_y:
+        #     y -= h / 2
+        draw.text((x, y), text, color, ImageFont.truetype(SourceSansPro, size=size), **kwargs)
 
     def draw_arrival(arrival: Arrival, *, x: float, i: int):
         draw.line([(x, (i + 2) * CELL_HEIGHT),
