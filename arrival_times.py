@@ -37,6 +37,7 @@ async def main(stop_id: str, refresh_rate: int):
         ), stop_id)
 
     inky_display = auto()
+    img = None
 
     urls = [
         'https://api-endpoint.mta.info/Dataservice/mtagtfsfeeds/nyct%2Fgtfs',
@@ -62,10 +63,20 @@ async def main(stop_id: str, refresh_rate: int):
             for stop in entity.trip_update.stop_time_update
             if stop.arrival.time
         ]
+        prev_img = img
         img = draw(stop_name,
                 dt.datetime.now(),
                 [a for a in arrivals if a.stop_id == stop_id])
-        inky_display.set_image(img)
+        if prev_img is None:
+            inky_display.set_image(img)
+        else:
+            new_pixels = img.load()
+            old_pixels = prev_img.load()
+            for x in range(img.width):
+                for y in range(img.height):
+                    if new_pixels[x, y] != old_pixels[x, y]:
+                        inky_display.set_pixel(x, y, new_pixels[x, y])
+
         inky_display.show()
         logging.info('Updated image')
         await asyncio.sleep(refresh_rate)
