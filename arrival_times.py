@@ -4,9 +4,8 @@ import asyncio
 import csv
 import datetime as dt
 import logging
-import tkinter as tk
 from google.transit import gtfs_realtime_pb2
-from PIL import ImageTk
+from inky.auto import auto
 
 from data import Arrival, Route
 from draw import draw
@@ -19,7 +18,7 @@ async def fetch_feed(url: str, session) -> gtfs_realtime_pb2.FeedMessage:
         return feed
 
 
-def main(stop_id: str, refresh_rate: int):
+async def main(stop_id: str, refresh_rate: int):
     with open('gtfs_subway/routes.txt') as f:
         routes = {
             line['route_id']: Route(
@@ -37,45 +36,36 @@ def main(stop_id: str, refresh_rate: int):
             if line['stop_id'] == stop_id
         ), stop_id)
 
-    root = tk.Tk()
-    label = tk.Label(root)
-    label.pack()
+    inky_display = auto()
 
-    async def refresh_image():
-        urls = [
-            'https://api-endpoint.mta.info/Dataservice/mtagtfsfeeds/nyct%2Fgtfs',
-            'https://api-endpoint.mta.info/Dataservice/mtagtfsfeeds/nyct%2Fgtfs-ace',
-            'https://api-endpoint.mta.info/Dataservice/mtagtfsfeeds/nyct%2Fgtfs-bdfm',
-            'https://api-endpoint.mta.info/Dataservice/mtagtfsfeeds/nyct%2Fgtfs-g',
-            'https://api-endpoint.mta.info/Dataservice/mtagtfsfeeds/nyct%2Fgtfs-jz',
-            'https://api-endpoint.mta.info/Dataservice/mtagtfsfeeds/nyct%2Fgtfs-l',
-            'https://api-endpoint.mta.info/Dataservice/mtagtfsfeeds/nyct%2Fgtfs-nqrw',
-            # Staten Island Railroad:
-            # 'https://api-endpoint.mta.info/Dataservice/mtagtfsfeeds/nyct%2Fgtfs-si'
-        ]
-        logging.info('Fetching data...')
-        async with aiohttp.ClientSession() as session:
-            feeds = await asyncio.gather(*(fetch_feed(url, session) for url in urls))
+    urls = [
+        'https://api-endpoint.mta.info/Dataservice/mtagtfsfeeds/nyct%2Fgtfs',
+        'https://api-endpoint.mta.info/Dataservice/mtagtfsfeeds/nyct%2Fgtfs-ace',
+        'https://api-endpoint.mta.info/Dataservice/mtagtfsfeeds/nyct%2Fgtfs-bdfm',
+        'https://api-endpoint.mta.info/Dataservice/mtagtfsfeeds/nyct%2Fgtfs-g',
+        'https://api-endpoint.mta.info/Dataservice/mtagtfsfeeds/nyct%2Fgtfs-jz',
+        'https://api-endpoint.mta.info/Dataservice/mtagtfsfeeds/nyct%2Fgtfs-l',
+        'https://api-endpoint.mta.info/Dataservice/mtagtfsfeeds/nyct%2Fgtfs-nqrw',
+        # Staten Island Railroad:
+        # 'https://api-endpoint.mta.info/Dataservice/mtagtfsfeeds/nyct%2Fgtfs-si'
+    ]
+    logging.info('Fetching data...')
+    async with aiohttp.ClientSession() as session:
+        feeds = await asyncio.gather(*(fetch_feed(url, session) for url in urls))
 
-        arrivals = [
-            Arrival(stop, route=routes[entity.trip_update.trip.route_id])
-            for feed in feeds
-            for entity in feed.entity
-            for stop in entity.trip_update.stop_time_update
-            if stop.arrival.time
-        ]
-        photo = ImageTk.PhotoImage(draw(
-            stop_name,
-            dt.datetime.now(),
-            [a for a in arrivals if a.stop_id == stop_id]))
-        label.config(image=photo)
-        label.image = photo  # prevent `photo` from getting garbage-collected
-        logging.info('Updated image')
-        label.after(refresh_rate * 1000, lambda: loop.run_until_complete(refresh_image()))
-
-    loop = asyncio.get_event_loop()
-    root.after(1, lambda: loop.run_until_complete(refresh_image()))
-    root.mainloop()
+    arrivals = [
+        Arrival(stop, route=routes[entity.trip_update.trip.route_id])
+        for feed in feeds
+        for entity in feed.entity
+        for stop in entity.trip_update.stop_time_update
+        if stop.arrival.time
+    ]
+    img = draw(stop_name,
+               dt.datetime.now(),
+               [a for a in arrivals if a.stop_id == stop_id])
+    inky_display.set_image(img)
+    inky_display.show()
+    logging.info('Updated image')
 
 
 '''
@@ -94,4 +84,4 @@ if __name__ == '__main__':
     parser.add_argument('-s', '--stop_id', required=True, help='The stop ID to display (from stops.txt)')
     parser.add_argument('-r', '--refresh_rate', type=int, default=10, help='The refresh rate in seconds')
     args = parser.parse_args()
-    main(args.stop_id, args.refresh_rate)
+    asyncio.run(main(args.stop_id, args.refresh_rate))

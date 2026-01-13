@@ -1,4 +1,5 @@
 aiohttp
 font-source-sans-pro
+inky
 gtfs-realtime-bindings
 pillow>=8.0.0
