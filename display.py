@@ -28,6 +28,13 @@ class Display:
             'S': self.inky_display.BLACK,
             'W': self.inky_display.YELLOW,
             'J': self.inky_display.RED,
+            '1': self.inky_display.RED,
+            '2': self.inky_display.RED,
+            '3': self.inky_display.RED,
+            '4': self.inky_display.GREEN,
+            '5': self.inky_display.GREEN,
+            '6': self.inky_display.GREEN,
+            '7': self.inky_display.BLUE,
         }
 
     def refresh(self, arrivals: Iterable[Arrival]) -> Image:
