@@ -49,23 +49,26 @@ async def main(stop_id: str, refresh_rate: int):
         # Staten Island Railroad:
         # 'https://api-endpoint.mta.info/Dataservice/mtagtfsfeeds/nyct%2Fgtfs-si'
     ]
-    logging.info('Fetching data...')
-    async with aiohttp.ClientSession() as session:
-        feeds = await asyncio.gather(*(fetch_feed(url, session) for url in urls))
 
-    arrivals = [
-        Arrival(stop, route=routes[entity.trip_update.trip.route_id])
-        for feed in feeds
-        for entity in feed.entity
-        for stop in entity.trip_update.stop_time_update
-        if stop.arrival.time
-    ]
-    img = draw(stop_name,
-               dt.datetime.now(),
-               [a for a in arrivals if a.stop_id == stop_id])
-    inky_display.set_image(img)
-    inky_display.show()
-    logging.info('Updated image')
+    while True:
+        logging.info('Fetching data...')
+        async with aiohttp.ClientSession() as session:
+            feeds = await asyncio.gather(*(fetch_feed(url, session) for url in urls))
+
+        arrivals = [
+            Arrival(stop, route=routes[entity.trip_update.trip.route_id])
+            for feed in feeds
+            for entity in feed.entity
+            for stop in entity.trip_update.stop_time_update
+            if stop.arrival.time
+        ]
+        img = draw(stop_name,
+                dt.datetime.now(),
+                [a for a in arrivals if a.stop_id == stop_id])
+        inky_display.set_image(img)
+        inky_display.show()
+        logging.info('Updated image')
+        await asyncio.sleep(refresh_rate * 1000)
 
 
 '''
