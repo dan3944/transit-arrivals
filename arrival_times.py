@@ -5,10 +5,9 @@ import csv
 import datetime as dt
 import logging
 from google.transit import gtfs_realtime_pb2
-from inky.auto import auto
 
 from data import Arrival, Route
-from draw import draw
+from display import Display
 
 
 async def fetch_feed(url: str, session) -> gtfs_realtime_pb2.FeedMessage:
@@ -36,9 +35,7 @@ async def main(stop_id: str, refresh_rate: int):
             if line['stop_id'] == stop_id
         ), stop_id)
 
-    inky_display = auto()
-    img = None
-
+    display = Display(stop_name)
     urls = [
         'https://api-endpoint.mta.info/Dataservice/mtagtfsfeeds/nyct%2Fgtfs',
         'https://api-endpoint.mta.info/Dataservice/mtagtfsfeeds/nyct%2Fgtfs-ace',
@@ -63,26 +60,9 @@ async def main(stop_id: str, refresh_rate: int):
             for stop in entity.trip_update.stop_time_update
             if stop.arrival.time
         ]
-        prev_img = img
-        img = draw(stop_name,
-                dt.datetime.now(),
-                [a for a in arrivals if a.stop_id == stop_id])
-        if prev_img is None:
-            logging.info('Setting full image')
-            inky_display.set_image(img)
-        else:
-            new_pixels = img.load()
-            old_pixels = prev_img.load()
-            diff_count = 0
-            for x in range(img.width):
-                for y in range(img.height):
-                    if new_pixels[x, y] != old_pixels[x, y]:
-                        inky_display.set_pixel(x, y, new_pixels[x, y])
-                        diff_count += 1
-            logging.info(f'Incrementally updating {diff_count} pixels')
-
-        inky_display.show()
-        logging.info('Updated image')
+        logging.info('Updating image')
+        display.refresh(a for a in arrivals if a.stop_id == stop_id)
+        logging.info('Finished updating image')
         await asyncio.sleep(refresh_rate)
 
 
