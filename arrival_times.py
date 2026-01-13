@@ -68,7 +68,7 @@ async def main(stop_id: str, refresh_rate: int):
         inky_display.set_image(img)
         inky_display.show()
         logging.info('Updated image')
-        await asyncio.sleep(refresh_rate * 1000)
+        await asyncio.sleep(refresh_rate)
 
 
 '''
