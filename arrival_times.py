@@ -68,14 +68,18 @@ async def main(stop_id: str, refresh_rate: int):
                 dt.datetime.now(),
                 [a for a in arrivals if a.stop_id == stop_id])
         if prev_img is None:
+            logging.info('Setting full image')
             inky_display.set_image(img)
         else:
             new_pixels = img.load()
             old_pixels = prev_img.load()
+            diff_count = 0
             for x in range(img.width):
                 for y in range(img.height):
                     if new_pixels[x, y] != old_pixels[x, y]:
                         inky_display.set_pixel(x, y, new_pixels[x, y])
+                        diff_count += 1
+            logging.info(f'Incrementally updating {diff_count} pixels')
 
         inky_display.show()
         logging.info('Updated image')
