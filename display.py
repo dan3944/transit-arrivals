@@ -96,5 +96,6 @@ class Display:
               size=18,
               anchor='mm')
 
+        img.transpose(Image.ROTATE_180)
         self.inky_display.set_image(img)
         self.inky_display.show()
