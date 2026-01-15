@@ -89,11 +89,12 @@ class Display:
         for i, arrival in enumerate(downtown):
             draw_arrival(arrival, x=IMG_WIDTH / 2, i=i)
 
-        draw.text((IMG_WIDTH / 2, CELL_HEIGHT),
-                f'Updated at {now:%-I:%M %p}',
-                fill=self.inky_display.GREEN,
-                font=ImageFont.truetype(SourceSansPro, size=18),
-                anchor='mm')
+        write(f'Updated at {now:%-I:%M %p}',
+              x=IMG_WIDTH / 2,
+              y=CELL_HEIGHT,
+              color=self.inky_display.YELLOW,
+              size=18,
+              anchor='mm')
 
         self.inky_display.set_image(img)
         self.inky_display.show()
