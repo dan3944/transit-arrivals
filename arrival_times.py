@@ -11,10 +11,14 @@ from display import Display
 
 
 async def fetch_feed(url: str, session) -> gtfs_realtime_pb2.FeedMessage:
-    async with session.get(url=url) as response:
-        feed = gtfs_realtime_pb2.FeedMessage()
-        feed.ParseFromString(await response.read())
-        return feed
+    try:
+        async with session.get(url=url) as response:
+            feed = gtfs_realtime_pb2.FeedMessage()
+            feed.ParseFromString(await response.read())
+            return feed
+    except Exception as e:
+        logging.error(f'Exception when fetching from {url}: {e}')
+        return gtfs_realtime_pb2.FeedMessage()
 
 
 async def main(stop_id: str, refresh_rate: int):
