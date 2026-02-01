@@ -85,7 +85,7 @@ class DisplayThread:
             ]))
 
             arrivals = [
-                Arrival(stop)
+                Arrival(stop, entity.trip_update.trip.route_id)
                 for feed in feeds
                 for entity in feed.entity
                 for stop in entity.trip_update.stop_time_update
