@@ -121,7 +121,7 @@ Example stop IDs:
     96th/Broadway: 120
     86th/Central Park West: A20
     Columbus Circle: A24
-    Pelham Parkway: 504
+    Pelham Pkway/White Plains Rd: 211
     E 180th St: 213
 '''
 
