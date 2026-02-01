@@ -3,24 +3,17 @@ from google.transit import gtfs_realtime_pb2
 from dataclasses import dataclass
 
 
-@dataclass(frozen=True)
-class Route:
-    id: str
-    color: str
-    text_color: str
-
-
 @dataclass(init=False)
 class Arrival:
-    route: Route
+    route_id: str
     stop_id: str
     direction: str
     when: dt.datetime
 
-    def __init__(self, event: gtfs_realtime_pb2.TripUpdate.StopTimeUpdate, route: Route):
+    def __init__(self, event: gtfs_realtime_pb2.TripUpdate.StopTimeUpdate, route_id: str):
         if not event.stop_id:
             raise Exception(f'Arrival() missing stop_id from event: {event}')
-        self.route = route
+        self.route_id = route_id
         self.stop_id = event.stop_id[:-1]
         self.direction = event.stop_id[-1]
         self.when = dt.datetime.fromtimestamp(event.arrival.time)

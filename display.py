@@ -57,7 +57,7 @@ class Display:
             draw.text((x, y), text, color, ImageFont.truetype(SourceSansPro, size=size), **kwargs)
 
         def draw_arrival(arrival: Arrival, *, x: float, i: int):
-            route_color = self.ROUTE_TO_COLOR.get(arrival.route.id, self.inky_display.BLACK)
+            route_color = self.ROUTE_TO_COLOR.get(arrival.route_id, self.inky_display.BLACK)
             route_text_color = self.inky_display.WHITE
             if route_color in (self.inky_display.WHITE, self.inky_display.YELLOW):
                 route_text_color = self.inky_display.BLACK
@@ -67,7 +67,7 @@ class Display:
             draw.circle((x + CIRCLE_RADIUS + CIRCLE_PADDING, (i + 2.5) * CELL_HEIGHT),
                         CIRCLE_RADIUS,
                         route_color)
-            write(arrival.route.id,
+            write(arrival.route_id,
                 x=x + CIRCLE_RADIUS + CIRCLE_PADDING,
                 y=(i + 2.5) * CELL_HEIGHT,
                 anchor='mm',
