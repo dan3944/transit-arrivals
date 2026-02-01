@@ -67,7 +67,7 @@ class DisplayThread:
         self._cancel.set()
         self._thread.join()
 
-    async def _show_station(self):
+    def _show_station(self):
         display = Display(self.name)
 
         while not self._cancel.is_set():
