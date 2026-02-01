@@ -57,7 +57,7 @@ class DisplayThread:
         self.refresh_rate = refresh_rate
         # We need to run _show_station() in a separate thread because read_edge_events()
         # is blocking, so it will never yield the asyncio loop to other tasks.
-        self._thread = threading.Thread(target=asyncio.run, args=(self._show_station(),))
+        self._thread = threading.Thread(target=self._show_station)
         self._cancel = threading.Event()
 
     def start(self):
