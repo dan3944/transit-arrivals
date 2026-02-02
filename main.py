@@ -57,7 +57,7 @@ class DisplayThread:
         self.refresh_rate = refresh_rate
         # We need to run _show_station() in a separate thread because read_edge_events()
         # is blocking, so it will never yield the asyncio loop to other tasks.
-        self._thread = threading.Thread(target=self._show_station)
+        self._thread = threading.Thread(target=self._show_station, name=self.name)
         self._cancel = threading.Event()
 
     def start(self):
@@ -71,7 +71,7 @@ class DisplayThread:
         display = Display(self.name)
 
         while not self._cancel.is_set():
-            logging.info(f'[{self.name}] Fetching data...')
+            logging.info('Fetching data...')
             feeds = asyncio.run(_fetch_feeds([
                 'https://api-endpoint.mta.info/Dataservice/mtagtfsfeeds/nyct%2Fgtfs',
                 'https://api-endpoint.mta.info/Dataservice/mtagtfsfeeds/nyct%2Fgtfs-ace',
@@ -92,12 +92,12 @@ class DisplayThread:
                 if stop.arrival.time
             ]
             if self._cancel.is_set(): break
-            logging.info(f'[{self.name}] Updating image')
+            logging.info('Updating image')
             display.refresh(a for a in arrivals if a.stop_id == self.stop_id)
-            logging.info(f'[{self.name}] Finished updating image')
+            logging.info('Finished updating image')
             self._cancel.wait(timeout=self.refresh_rate)
 
-        logging.info(f'[{self.name}] Cancelled')
+        logging.info('Cancelled')
 
 
 async def _fetch_feeds(urls: List[str]) -> List[gtfs_realtime_pb2.FeedMessage]:
@@ -126,7 +126,7 @@ Example stop IDs:
 '''
 
 if __name__ == '__main__':
-    logging.basicConfig(format='%(asctime)s %(levelname)s %(message)s', level=logging.INFO)
+    logging.basicConfig(format='%(asctime)s %(levelname)s [%(threadName)s] %(message)s', level=logging.INFO)
     parser = argparse.ArgumentParser()
     parser.add_argument('-s', '--stop_ids', required=True, nargs='+', help='The stop IDs to display (from stops.txt)')
     parser.add_argument('-r', '--refresh_rate', type=int, default=30, help='The refresh rate in seconds')
