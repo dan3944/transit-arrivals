@@ -91,8 +91,8 @@ class DisplayThread:
                 for stop in entity.trip_update.stop_time_update
                 if stop.arrival.time
             ]
-            logging.info(f'[{self.name}] Updating image')
             if self._cancel.is_set(): break
+            logging.info(f'[{self.name}] Updating image')
             display.refresh(a for a in arrivals if a.stop_id == self.stop_id)
             logging.info(f'[{self.name}] Finished updating image')
             self._cancel.wait(timeout=self.refresh_rate)
